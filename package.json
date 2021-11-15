@@ -1,23 +1,19 @@
 {
-  "name": "ncc-chat-app",
+  "name": "assignment-2-ncc",
   "version": "1.0.0",
-  "description": "A web chat application for the course of Network centric computing",
-  "main": "index.js",
+  "description": "",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/alexromao3/um.chatApplication.git"
-  },
-  "author": "Alexandre Romão",
+  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/alexromao3/um.chatApplication/issues"
-  },
-  "homepage": "https://github.com/alexromao3/um.chatApplication#readme",
   "dependencies": {
     "express": "^4.17.1",
     "socket.io": "^4.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

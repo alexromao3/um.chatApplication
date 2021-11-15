@@ -1,55 +1,59 @@
 const express = require('express');
-const app = express();
+const path = require('path');
 const http = require('http');
+const socketio = require('socket.io')
+
+const app = express();
 const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
+const io = socketio(server);
 
-app.use(express.static(__dirname + '/public'));
+const PORT = 3000 || process.env.PORT;
 
-let users = [];
-let messages = [];
+const users = [];
 
-//Initialize first page when entering in the app
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
+app.use(express.static(path.join(__dirname, 'public')));
 
-// //Run when user connects or disconnects
-// io.on('connection', (socket) => {
-//     console.log('user connected');
+//Run when client connects
+io.on('connection', socket => {
+    socket.emit('message', 'Welcome to NCC Chat');
+    //socket.broadcast.emit('message', 'A user has joined the chat.');
+    //var username = prompt('What´s your username');
+    //socket.emit('new-user', username);
 
-//     socket.on('disconnect', () => {
-//       console.log('user disconnected');
-//     });
-//   });
 
-  //Receive the username from the client
-  io.on('connection', (socket) => {
-    socket.on('username-input', (username) =>{
-      console.log(username+ ' connected.');
-      users.push(username);
+    socket.on('disconnect', () => {
+        io.emit('message', 'A user has left the chat.');
+    });
+
+    socket.on('chatMessage', (message) => {
+        var user = GetUsernameFromId(socket.id);
+        io.emit('message', message, user.username);
     })
-  })
 
-  //Send the username to the 
+    socket.on('new-user', (user) => {
+        //console.log(user)
+        users.push([socket.id, user])
+        console.log(socket.id+ ' : ' +user);
+        JoinUser(socket.id, user, null);
+    })
+    // socket.on('addUser', (username) => {
+    //     users.push([socket.id, username]);
+    // })
 
+    function GetUsernameFromId(socketid){
+        return users.find(user => user.id === socketid);
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-server.listen(3000, () => {
-  console.log('listening on *:3000');
+    function JoinUser(id, username, room){
+        const user = {id, username, room}
+        users.push(user);
+        return user;
+    }
 });
+
+
+
+
+
+
+server.listen(PORT, () => console.log('Server running on port '+PORT));

@@ -10,7 +10,7 @@
   body{
     margin: 0;
     padding: 0;
-    background-color: lightyellow;
+    background-color: rgb(228, 228, 122);
     height: 100vh;
     overflow: hidden;
   }

@@ -3,26 +3,40 @@
   <head>
     <title>NCC chat</title>
     <style>
-      body {
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+      /*body {
         padding: 0;
         margin: 0;
         display: flex;
         justify-content: center;
         background-color: rgb(228, 228, 122);
+      }*/
+      *{
+        font-family: 'Roboto', sans-serif;
       }
-  
+      
+      body{
+        background-color: rgb(228, 228, 122);;
+      }
+      #message-part{
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        background-color: rgb(228, 228, 122);
+      }
+
       #message-container {
-        width: 80%;
+        width: 70%;
         max-width: 1200px;
       }
   
       #message-container div {
-        background-color: #CCC;
+        background-color: rgb(228, 228, 122);
         padding: 5px;
       }
   
       #message-container div:nth-child(2n) {
-        background-color: #FFF;
+        background-color: rgb(228, 228, 122);
       }
   
       #send-container {
@@ -31,7 +45,7 @@
         bottom: 0;
         background-color: rgb(228, 228, 122);
         max-width: 1200px;
-        width: 80%;
+        width: 50%;
         display: flex;
       }
   
@@ -40,18 +54,26 @@
       }
 
       #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #efefef; }     
+      #messages > li { padding: 0.2rem 1rem; }
+      #messages > li:nth-child(odd) { background: rgb(228, 228, 122);; }   
+      
+
+      #user-list{width: 160px; height: 100%; position: fixed; z-index: 1; top: 0; overflow-x:hidden; padding-top: 20px; border-right: 0px solid #8a7e7e; float:left; background-color: rgb(228, 228, 122);}
+      #user-list ul{padding:0; margin:0;}
+      #user-list ul li{padding: 5px 0; cursor:pointer; color: black; list-style-type: none; padding: 10px 0;}
+
     </style>
   </head>
   
-  <body>
-    <ul id="messages"></ul>
-    <form id="send-container">
-      <input type="text" id="message-input">
-      <button type="submit">Send</button>
-    </form>
-
+  <body> 
+    <div id="user-list" class="user-list"></div>
+    <div id="message-part">
+      <ul id="messages"></ul>
+      <form id="send-container">
+        <input type="text" id="message-input">
+        <button type="submit">Send</button>
+      </form> 
+    </div>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.2/qs.min.js"
       integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4="

@@ -12,7 +12,7 @@ const username = Qs.parse(location.search, {
     ignoreQueryPrefix: true
 });
 
-//Send the username received in the index to the server validate
+//Send the username received in the index to server validation
 socket.emit("new-user", (username.username));
 
 
@@ -25,16 +25,58 @@ socket.on('message', (message, username) => {
     //outputMessage(message);
 });
 
-socket.on('new-user', username => {
+//Message from bot to be outputted
+socket.on('bot-message', (message) => {
     var item = document.createElement('div');
-    item.textContent('Welcome '+socket.id+ ' : ' +username);
+    item.textContent = "NCC-Bot : " +message;
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
+    //outputMessage(message);
+});
+
+socket.on('welcome-user', username => {
+    var item = document.createElement('div');
+    item.textContent = username +' has joined the chat.';
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+
 })
-// socket.on('connection', socket => {
-//     var username = prompt('What´s your username');
-//     socket.emit('new-user', username);
-// })
+
+
+socket.on('update-userlist', users => {
+
+    document.getElementById('user-list').innerHTML = '';
+    ul = document.createElement('ul');
+    document.getElementById('user-list').appendChild(ul);
+    //alert(users);
+    // alert(users.length)
+    // alert(connectedUserId);
+    // for (let i = 0; i < users.length; i++){
+    //     alert(users[i].username)
+    // }
+    for (var i = 0; i < users.length; i++)
+    {
+        if(users[i].id !== socket.id){
+            let li = document.createElement('li');
+            ul.appendChild(li);
+            li.textContent = users[i].username;
+            alert(li.textContent);
+        }
+    }
+
+})
+
+
+socket.on('goodbye-user', username => {
+    var item = document.createElement('div');
+    item.textContent = username +' has left the chat.';
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+
+
+})
+
+
 //Message submit
 chatForm.addEventListener('submit', e => {
     e.preventDefault();
@@ -44,12 +86,3 @@ chatForm.addEventListener('submit', e => {
     message.value = "";
 });
 
-// })
-
-//Add user to system
-// userForm.addEventListener('submit', e => {
-//     e.preventDefault();
-//     const username = document.getElementById('username').value;
-//     socket.emit('addUser', username);
-//     username = '';
-// })

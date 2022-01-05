@@ -4,76 +4,248 @@
     <title>NCC chat</title>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
-      /*body {
-        padding: 0;
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        background-color: rgb(228, 228, 122);
-      }*/
-      *{
-        font-family: 'Roboto', sans-serif;
-      }
-      
-      body{
-        background-color: rgb(228, 228, 122);;
-      }
-      #message-part{
-        margin: 0;
+
+      body {
         display: flex;
         justify-content: center;
         background-color: rgb(228, 228, 122);
       }
 
-      #message-container {
-        width: 70%;
-        max-width: 1200px;
+      *{
+        font-family: 'Roboto', sans-serif;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      #message-part{
+        background-color: white;
+        /*margin: 20px;*/
+        /*display: flex;*/
+        /*justify-content: center;*/
+        position: relative;
+        height: calc(100% - 120px);
+        padding: 20px;
+        overflow-y: auto;
+        max-width: 100%;
+        overflow-x: hidden;
+        border-left: 2px solid black;
+        overflow-wrap: break-word;
+
       }
   
-      #message-container div {
-        background-color: rgb(228, 228, 122);
-        padding: 5px;
-      }
-  
-      #message-container div:nth-child(2n) {
-        background-color: rgb(228, 228, 122);
-      }
-  
-      #send-container {
-        position: fixed;
-        padding-bottom: 50px;
-        bottom: 0;
-        background-color: rgb(228, 228, 122);
-        max-width: 1200px;
-        width: 50%;
+      #send-container /*.send-div*/ {
+        /*position: absolute;*/
+        /*position: absolute;*/
+        /*margin-bottom: 20px;*/
+        /*bottom: 0;*/
+        background-color: white;
+        /*max-width: 1500px;*/
+        justify-content: center;
+        width: 90%;
+        height: 20px;
         display: flex;
+        margin: auto;
+      } 
+      
+      .send-div{
+        /*margin-bottom: 20px;*/
+        position: sticky;
+        /*bottom: 90vh;*/
+        display: flex;
+        justify-content: center;
+        height: 30px;
+        width: 100%;
+        display: block;
+        margin: auto;
+      }
+
+      .chatbox-input{
+        position: relative;
+        width: 100%;
+        height: 60px;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 2px solid black;
+        border-left: 2px solid black;
+      }
+
+      .chatbox-input input{
+        position: relative;
+        width: 90%;
+        margin: 0 20px;
+        padding: 10px 20px;
+        border: 1px solid black;
+
+
       }
   
       #message-input {
         flex-grow: 1;
       }
 
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.2rem 1rem; }
-      #messages > li:nth-child(odd) { background: rgb(228, 228, 122);; }   
-      
+      #messages { 
+        list-style-type: none; 
+        margin: 30; 
+        padding: 4;
+      }
 
-      #user-list{width: 160px; height: 100%; position: fixed; z-index: 1; top: 0; overflow-x:hidden; padding-top: 20px; border-right: 0px solid #8a7e7e; float:left; background-color: rgb(228, 228, 122);}
-      #user-list ul{padding:0; margin:0;}
-      #user-list ul li{padding: 5px 0; cursor:pointer; color: black; list-style-type: none; padding: 10px 0;}
+      #messages > li { 
+        padding: 0.2rem 1rem;
+        margin: 5px; 
+      }
+
+      #messages > li:nth-child(odd) {
+        background: white;;
+      }    
+      
+      #user-list{
+        position: fixed;
+        width: 150px;
+        height: 100%;
+        overflow-x: hidden;
+        left: auto;
+        border-right: 0px;
+      }
+
+      #user-list ul{
+        padding: 0;
+      }
+
+      #user-list ul li{
+        color: black;
+        list-style-type: none;
+        left: 0%;
+        white-space: normal;
+      } 
+  
+      .header {
+        position: relative;
+        width: 100%;
+        height: 60px;
+        border-bottom: 2px solid black;
+        /*border-left: 2px solid black;*/
+      }
+
+      .header p{
+        margin: auto;
+        text-align: center;
+        line-height: 60px;
+      }
+
+      .header2 {
+        position: relative;
+        width: 100%;
+        height: 60px;
+        border-bottom: 2px solid black;
+        border-left: 2px solid black;
+      }
+
+      .header2 p{
+        margin: auto;
+        text-align: center;
+        line-height: 60px;
+      }
+
+      .user-list ul{
+        padding:0;
+        margin:0;
+
+      }
+
+      .user-list #users{
+        overflow-y: auto;
+      }
+
+      .user-list ul li{
+        padding: 5px 0;
+        cursor:pointer;
+        color: black;
+        list-style-type:none;
+        padding: 10px 0;
+        justify-items: center;
+        text-align: center;
+      }
+
+      .container{
+        margin-top: 20px;
+        position: relative;
+        width: 1400px;
+        max-width: 100%;
+        height: calc(100vh - 80px);
+        background: rgb(228, 228, 122);
+        display: flex;
+        border: 2px solid black;
+      }
+
+      .container .leftside {
+        position: relative;
+        flex: 30%;
+        background: white;
+      }
+
+      .container .rightside {
+        position: relative;
+        flex: 70%;
+        background: white;
+        max-width: 100%;
+        overflow-x: hidden;
+        /*overflow-y: scroll;*/
+      }
+
+      .leftside .user-list{
+        position: relative;
+        width: 100%;
+        height: 90%;
+        max-width: 100%;
+        align-items: center;
+        padding: 15px;
+        cursor: pointer;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      .leftside #users {
+        height: 400px;
+        overflow: auto;
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .leftside #users li{
+        clear: both;
+        cursor: pointer;
+        height: 60px;
+      }
 
     </style>
   </head>
-  
-  <body> 
-    <div id="user-list" class="user-list"></div>
-    <div id="message-part">
-      <ul id="messages"></ul>
-      <form id="send-container">
-        <input type="text" id="message-input">
-        <button type="submit">Send</button>
-      </form> 
+  <body>
+    <div class="container">
+      <div class="leftside">
+        <div class="header">
+          <p><b>Users online</b></p>
+        </div>
+        <div class="user-list">
+        </div>
+      </div>
+      <div class="rightside">
+        <div class="header2">
+          <p><b>Chat</b></p>
+        </div>
+        <div id="message-part">
+          <ul id="messages"></ul>
+        </div>
+        <div class="chatbox-input">
+          <form id="send-container">
+            <input type="text" id="message-input">
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.2/qs.min.js"
       integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4="

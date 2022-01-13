@@ -17,33 +17,28 @@ socket.emit("new-user", (username.username));
 
 
 //Message from server to be outputted
-socket.on('OutputMessage', (message, username) => {
+socket.on('OutputMessage', (message, username, room) => {
     /*var item = document.createElement('p');
     item.textContent = username+ " : " +message;
     messages.appendChild(item);
     divMessage.scrollIntoView()*/
     var li = document.createElement("li")
-    li.appendChild(document.createTextNode(username+ " : " +message))
+    li.appendChild(document.createTextNode(username+ " ["+room+"] : " +message))
     messages.appendChild(li)
     // $('messages').append($('<li>').text(username+ " : " +message))
     // var ul = document.getElementById("messages");
     divMessage.scrollTop = divMessage.scrollHeight
 });
 
-socket.on("SimpleMessage", message => {
-    var item = document.createElement('p');
-    item.textContent = "NCCBOT"+ " : " +message;
-    messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
-})
-//Message from bot to be outputted
-// socket.on('bot-message', (message) => {
-//     var item = document.createElement('div');
-//     item.textContent = "NCC-Bot : " +message;
-//     messages.appendChild(item);
-//     window.scrollTo(0, document.body.scrollHeight);
-//     //outputMessage(message);
-// });
+socket.on('OutputMessageBot', (message, username) => {
+    var li = document.createElement("li")
+    li.appendChild(document.createTextNode(username+" : "+message))
+    messages.appendChild(li)
+    divMessage.scrollTop = divMessage.scrollHeight
+});
+
+
+
 
 socket.on('welcome-user', username => {
     // var item = document.createElement('div');
@@ -69,14 +64,6 @@ const createRoom = (OtherUserid) => {
 
 
 
-// const sendMessage = (room) => {
-//     let loggedUser = socket.id;
-//     let message = $('#'+room).find('.messageText').val();
-//     $('#'+room).find('.messageText').val('');
-//     socket.emit('message', {room: room, message:message, from: loggedUser});
-//     sendMyMessage(room, loggedUser, message)
-// }
-
 
 
 socket.on('update-userlist', users => {
@@ -97,6 +84,10 @@ socket.on('NewRoomWarn', (adminId, OtherUserId) => {
     if (socket.id == adminId){
         socket.emit('OutputMessage')
     }
+})
+
+socket.on('clear', () => {
+    messages.innerHTML = ""
 })
 
 

@@ -14,12 +14,9 @@ const PORT = 3000 || process.env.PORT;
 const users = []
 const rooms = []
 const names = []
+const games = []
 
 var gameOn = "false"
-var wordToMatch
-var unknownWord = ""
-var roomNameee
-var unknownWordChanged
 var CurrentUser
 var GameAdmin
 var missLetterCounter = 0
@@ -44,7 +41,6 @@ io.on('connection', socket => {
         io.emit('update-userlist', users);
     });
 
-    var newGuess
     socket.on('chatMessage', message => {
 
     CurrentUser = GetUserFromId(socket.id)
@@ -63,10 +59,10 @@ io.on('connection', socket => {
                     let otherUserName = users[i].username
                     let roomName = messageChanged.replace(otherUserName+" ", "")
                     let currentUserName = GetUserFromId(socket.id)
-                    CreateRoom(roomName, socket.id, otherUserId)
+                    CreateRoom(roomName, socket.id, null)
                     socket.join(roomName)
-                    io.to(socket.id).emit("OutputMessage", "You have created the room "+roomName+ " with "+otherUserName+". You are currently in that room.", "NCC BOT")
-                    io.to(otherUserId).emit("OutputMessage", "You have been invited to the room "+roomName+" with "+currentUserName.username+". To join type /joinroom "+ roomName, "NCC BOT")
+                    io.to(socket.id).emit("OutputMessageBot", "You have created the room "+roomName+ " with "+otherUserName+". You are currently in that room.", "NCC BOT")
+                    io.to(otherUserId).emit("OutputMessageBot", "You have been invited to the room "+roomName+" with "+currentUserName.username+". To join type /joinroom "+ roomName, "NCC BOT")
                 }
             }
         }
@@ -75,16 +71,16 @@ io.on('connection', socket => {
         else if (message.startsWith("/joinroom")){
             let messageChanged = message.replace("/joinroom ", "")
             for (i = 0; i < rooms.length; i++){
-                if (messageChanged.startsWith(rooms[i].name)){
+                if (messageChanged == rooms[i].name){
                     let room = rooms[i].name
                     try {
+                        rooms[i].userId = socket.id
                         socket.join(room)
-                        io.to(socket.id).emit("OutputMessage", "You have joined the room "+room, "NCC BOT")
+                        io.to(socket.id).emit("OutputMessageBot", "You have joined the room "+room, "NCC BOT")
                         //socket.join(room)
                     }
                     catch{
-                        console.log("erro")
-                        io.to(socket.id).emit("OutputMessage", "Something went wrong. You weren't able to join the room.", "NCC BOT")
+                        io.to(socket.id).emit("OutputMessageBot", "Something went wrong. You weren't able to join the room.", "NCC BOT")
                     }
                 }
             }
@@ -93,13 +89,13 @@ io.on('connection', socket => {
         //If the user wants to leave the room 
         else if (message.startsWith("/leaveroom")){
             messageChanged = message.replace("/leaveroom ", "")
-            console.log(messageChanged)
+            //console.log(messageChanged)
             for (i = 0; i < rooms.length; i++){
                 if (messageChanged.startsWith(rooms[i].name.toString())){
                     if(CheckIfInRoom(socket.id) != ""){
-                        io.to(rooms[i].name).emit("OutputMessage", "The room "+rooms[i].name +" will be deleted.", "NCC BOT")
-                        io.to(rooms[i].name).emit("OutputMessage", "Room deleted. You are no longer in this room.", "NCC BOT")
-                        console.log(rooms)
+                        io.to(rooms[i].name).emit("OutputMessageBot", "The room "+rooms[i].name +" will be deleted.", "NCC BOT")
+                        io.to(rooms[i].name).emit("OutputMessageBot", "Room deleted. You are no longer in this room.", "NCC BOT")
+                        //console.log(rooms)
                         socket.leave(rooms[i].name)
                         rooms.splice(rooms[i])
                     }
@@ -108,85 +104,93 @@ io.on('connection', socket => {
             
         }
 
+        else if (message == "/clear"){
+            socket.emit('clear')
+        }
+
         else if (message.startsWith("/deleteroom")){
             let roomToBeDeleted = message.replace("/deleteroom ", "")
             let room = GetRoomWithName(roomToBeDeleted)
             if (room != null){
                 if (room.adminId == socket.id){
-                    io.to(room.name).emit("OutputMessage", "The room "+room.name +" will be deleted.", "NCC BOT")
-                    io.to(room.name).emit("OutputMessage", "Room deleted. You are no longer in this room.", "NCC BOT")
+                    io.to(room.name).emit("OutputMessageBot", "The room "+room.name +" will be deleted.", "NCC BOT")
+                    io.to(room.name).emit("OutputMessageBot", "Room deleted. You are no longer in this room.", "NCC BOT")
                     socket.leave(room.name)
                     rooms.splice(room)
                 }
                 else {
-                    io.to(socket.id).emit("OutputMessage", "Error. You can't delete that room.", "NCC BOT")
+                    io.to(socket.id).emit("OutputMessageBot", "Error. You can't delete that room.", "NCC BOT")
                 }
             }
             else {
-                io.to(socket.id).emit("OutputMessage", "Error. You can't delete that room.", "NCC BOT")
+                io.to(socket.id).emit("OutputMessageBot", "Error. You can't delete that room.", "NCC BOT")
             }
 
         }
 
         else if (message == "/help"){
 
-            let help = "Welcome to mijo.pt chat."
-            let help1 = "You only can talk with other users when inside a room. To create a room use '/createroom User NameOfRoom'."
+            let help = "Welcome to NCC Web Chat."
+            let help1 = "You only can talk with other users easily."
             let help2 = "To leave a room use '/leaveroom NameOfRoom."
             let help3 = "To delete a room (if you are the admin), use '/deleteroom NameOfRoom'."
             let help4 = "Good chat!"
             let help5 = "PS: You can play a game, just be the admin of a room and type #GAMESTART!!!"
 
-            io.to(socket.id).emit("OutputMessage", help, "NCC BOT")
-            io.to(socket.id).emit("OutputMessage", help1, "NCC BOT")
-            io.to(socket.id).emit("OutputMessage", help2, "NCC BOT")
-            io.to(socket.id).emit("OutputMessage", help3, "NCC BOT")
-            io.to(socket.id).emit("OutputMessage", help4, "NCC BOT")
-            io.to(socket.id).emit("OutputMessage", help5, "NCC BOT")
+            io.to(socket.id).emit("OutputMessageBot", help, "NCC BOT")
+            io.to(socket.id).emit("OutputMessageBot", help1, "NCC BOT")
+            io.to(socket.id).emit("OutputMessageBot", help2, "NCC BOT")
+            io.to(socket.id).emit("OutputMessageBot", help3, "NCC BOT")
+            io.to(socket.id).emit("OutputMessageBot", help4, "NCC BOT")
+            io.to(socket.id).emit("OutputMessageBot", help5, "NCC BOT")
 
         }
 
         else if (message == "#GAMESTART"){
-
+            console.log("GAMESTART")
             let userPower = CheckIfInRoom(socket.id)
-            //console.log(userPower)
-            let roomName = ""
+            var roomName = ""
             if (userPower == "adminId"){
                 for (var i = 0; i < rooms.length; i++){
                     if (rooms[i].adminId == socket.id){
+                        console.log("admin")
                         roomName = rooms[i].name
-                        roomNameee = roomName
                         var OtherUserInRoom = GetUserFromId(rooms[i].userId)
                         CurrentUser.status = "gaming"
                         OtherUserInRoom.status = "gaming"
+                        var game = {Admin: socket.id, Player: rooms[i].userId, room: roomName, wordToBeGuessed: "", wordChanged: "", letters: []}
                     }
                 }
-                io.to(roomName).emit("OutputMessage", "Word Guessing Game started!", "NCC BOT")
-                WordGuessGameStart(roomNameee)
+                console.log(users)
+                io.to(roomName).emit("OutputMessageBot", "Word Guessing Game started!", "NCC BOT")
+                WordGuessGameStart(game)
             }
             else{
-                io.to(socket.id).emit("OutputMessage", "You can't start the game because you are not admin of any room.", "NCC BOT")
+                io.to(socket.id).emit("OutputMessageBot", "You can't start the game because you are not admin of any room.", "NCC BOT")
             }
         }
 
         //Verifica se o user que está mandando a mensagem está numa sala e se sim mandar para a sala
         else {
+            //console.log(users)
+            //console.log(rooms)
             let userHasRoom = 'false'
             for (i = 0; i < rooms.length; i++){
                 if (rooms[i].adminId == socket.id || rooms[i].userId == socket.id){
                     userHasRoom = 'true'
                     try{
-                        io.to(rooms[i].name).emit('OutputMessage', message, user.username)
+                        //io.to(rooms[i].name).emit('OutputMessage', message, user.username)
+                        io.to(rooms[i].name).emit('OutputMessage', message, user.username, rooms[i].name)
                     }
                     catch{
-                        io.to(socket.id).emit('OutputMessage', "Error with the room. Room deleted.", "NCC BOT")
+                        io.to(socket.id).emit('OutputMessageBot', "Error with the room. Room deleted.", "NCC BOT")
                         rooms.splice(rooms[i])
                         io.emit('update-userlist', users);
                     }
                 }
             }
             if (userHasRoom == 'false'){
-                io.emit('OutputMessage', message, user.username)
+                io.emit('OutputMessage', message, user.username, "public")
             }
         }
     }
@@ -194,31 +198,45 @@ io.on('connection', socket => {
 
     //If the current user status is gaming (If the user is playing the game)
     else {
-        console.log(message)
+        //console.log(message)
+        console.log(users)
         if (message == "#GAMEEND"){
-            for (var i = 0; i < rooms.length; i++){
-                if (rooms[i].adminId == socket.id){
-                    var roomName = rooms[i].name
-                    var OtherUserInRoom = GetUserFromId(rooms[i].userId)
+            for (var i = 0; i < games.length; i++){
+                if (games[i].Admin == socket.id){
+                    var OtherUserInRoom = GetUserFromId(games[i].Player)
+                    //let currentGameAdmin = games[i].Admin
                     CurrentUser.status = "chat"
                     OtherUserInRoom.status = "chat"
+                    io.to(games[i].room).emit("OutputMessageBot", "The game was ended by "+CurrentUser.username+".", "NCC BOT")
+                    games.splice(i, 1)
                 }
             }
-            io.to(roomName).emit("OutputMessage","The game was ended by "+CurrentUser.username+".", "NCC BOT")
+            //console.log(games)
+            //console.log(users)
         }
         else{
-            newGuess = message.toUpperCase()
-            if (newGuess == wordToMatch){
-                var user = GetUserFromId(socket.id)
-                io.to(roomNameee).emit("OutputMessage", "Word to be guessed: "+wordToMatch, "NCC BOT")
-                io.to(roomNameee).emit("OutputMessage", "Game is finished. " + user.username + " was the winner!", "NCC BOT")
-                WordGuessGameStart(roomNameee)
+            
+            var currentGame = GetGameFromAnyplayerId(socket.id)
+            console.log(currentGame)
+            var word = currentGame.wordToBeGuessed
+            var newGuess = message.toUpperCase()
+            if (newGuess == word){
+                //var user = GetUserFromId(socket.id)
+                io.to(currentGame.room).emit("OutputMessageBot", "Word to be guessed: "+currentGame.wordToBeGuessed, "NCC BOT")
+                io.to(currentGame.room).emit("OutputMessageBot", "Game is finished. " + CurrentUser.username + " was the winner!", "NCC BOT")
+                for (var i = 0; i < games.length; i++){
+                    if (games[i] == currentGame){
+                        games.splice(i, 1)
+                    }
+                }
+                var game = {Admin: currentGame.Admin, Player: currentGame.Player, room: currentGame.room, wordToBeGuessed: "", wordChanged: "", letters: []}
+                WordGuessGameStart(game)
             }
-            else if (wordToMatch.includes(newGuess)){
-                for (var i = 0; i < wordToMatch.length; i++){
-                    if(wordToMatch[i] == newGuess){
-                        unknownWordChanged = setCharAt(unknownWordChanged, i, newGuess)
-                        io.to(roomNameee).emit("OutputMessage", "Word to be guessed: "+unknownWordChanged, "NCC BOT")
+            else if (word.includes(newGuess)){
+                for (var i = 0; i < word.length; i++){
+                    if(word[i] == newGuess){
+                        currentGame.wordChanged = setCharAt(currentGame.wordChanged, i, newGuess)
+                        io.to(currentGame.room).emit("OutputMessageBot", "Word to be guessed: "+currentGame.wordChanged, "NCC BOT")
                     }
                 }
             }
@@ -227,20 +245,26 @@ io.on('connection', socket => {
                 missLetterCounter++
                 if (missLetterCounter % 3 == 0){
                     let integers = []
-                    for (var i = 0; i < wordToMatch.length; i++){
+                    for (var i = 0; i < word.length; i++){
                         integers.push(i)
                     }
                     shuffle(integers)
                     var random = integers[0]
-                    unknownWordChanged = setCharAt(unknownWordChanged, random, wordToMatch[random])
-                    io.to(roomNameee).emit("OutputMessage", "Word to be guessed: "+unknownWordChanged, "NCC BOT")
+                    currentGame.wordChanged = setCharAt(currentGame.wordChanged, random, word[random])
+                    io.to(currentGame.room).emit("OutputMessageBot", "Word to be guessed: "+currentGame.wordChanged, "NCC BOT")
                     //unknownWordChanged = unknownWord
                 }
             }
-            if(!unknownWordChanged.includes("_")){
+            if(!currentGame.wordChanged.includes("_")){
                 var user = GetUserFromId(socket.id)
-                io.to(roomNameee).emit("OutputMessage", "Game is finished. " + user.username + " was the winner!", "NCC BOT")
-                WordGuessGameStart(roomNameee)
+                io.to(currentGame.room).emit("OutputMessageBot", "Game is finished. " + user.username + " was the winner!", "NCC BOT")
+                for (var i = 0; i < games.length; i++){
+                    if (games[i] == currentGame){
+                        games.splice(i, 1)
+                    }
+                }
+                var game = {Admin: currentGame.Admin, Player: currentGame.Player, room: currentGame.room, wordToBeGuessed: "", wordChanged: "", letters: []}
+                WordGuessGameStart(game)
             }
         }
        
@@ -281,16 +305,17 @@ io.on('connection', socket => {
         return users.find(user => user.id === socketid);
     }
 
-    function resetGameValues(){
-        let commonWords = randomWords(25)
-        wordToMatch = commonWords[Math.floor(Math.random() * commonWords.length)].toUpperCase()
-        console.log(wordToMatch)
-        unknownWord = ""
-        unknownWordChanged = ""
-    }
-
     function GetRoomWithName(roomName){
         return rooms.find(room => room.name === roomName)
+    }
+
+    function GetGameFromAnyplayerId(playerId){
+        for (var i = 0; i < games.length; i++){
+            if (games[i].Admin == playerId || games[i].Player == playerId){
+                return games[i]
+            }
+        }
+        //return games.find(game => game.adminId == playerId || game.playerId == playerId)
     }
 
     function JoinUser(id, username, status){
@@ -299,13 +324,6 @@ io.on('connection', socket => {
         return user;
     }
 
-    function LeaveUser(id){
-        GetUserFromId(id);
-        var user = users.find(user => user.id === id);
-        //users.splice(user => user.id === id);
-        users.splice(user);
-        return user.username;
-    }
 
     //Function to create room
     function CreateRoom(name, adminId, userId){
@@ -338,22 +356,24 @@ io.on('connection', socket => {
         return str.substring(0,index) + chr + str.substring(index+1);
     }
 
-    function WordGuessGameStart(roomName){
-        resetGameValues()
+    function WordGuessGameStart(game){
+        let commonWords = randomWords(25)
+        var wordToMatch = commonWords[Math.floor(Math.random() * commonWords.length)].toUpperCase()
+        console.log(wordToMatch)
+        game.wordToBeGuessed = wordToMatch
         let integers = []
+
         for (var i = 0; i < wordToMatch.length; i++){
-            unknownWord = unknownWord + "_"
+            game.wordChanged = game.wordChanged + "_"
             integers.push(i)
         }
+
         shuffle(integers)
         var random = integers[0]
-        unknownWord = setCharAt(unknownWord, random, wordToMatch[random])
-        unknownWordChanged = unknownWord
-        io.to(roomName).emit("OutputMessage", "Word to be guessed: "+unknownWord, "NCC BOT")
-            //}
-            //else {
-            //    io.to(socket.id).emit("OutputMessage", "You can't start the game because you are not admin of any room.", "NCC BOT")
-            //}
+        game.wordChanged = setCharAt(game.wordChanged, random, wordToMatch[random])
+        console.log(game)
+        games.push(game)
+        io.to(game.room).emit("OutputMessageBot", "Word to be guessed: "+game.wordChanged, "NCC BOT")
 
     }
 
